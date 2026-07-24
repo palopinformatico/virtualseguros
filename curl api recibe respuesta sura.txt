@@ -1,0 +1,64 @@
+curl -X POST https://virtualseguros.cl/api/recibe_poliza_sura.php \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: VIRTUAL_SEGUROS_a3Zp8Kd1QxLm2Rt9" \
+  -d '{
+    "idSolicitud": "123456789",
+    "idInspeccion": "987654321",
+    "patente": "GZRB75",
+    "aprueba_rechaza_inspeccion": "APROBADO",
+    "motivo_cancelacion": "",
+    "motivo_rechazo_distinto_danio": ""
+  }'
+  
+--------------------
+
+curl -X POST https://virtualseguros.cl/api/recibe_poliza_sura.php \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idSolicitud": "123456789",
+    "idInspeccion": "987654321",
+    "patente": "GZRB75",
+    "aprueba_rechaza_inspeccion": "APROBADO",
+    "motivo_cancelacion": "",
+    "motivo_rechazo_distinto_danio": ""
+  }'
+
+  
+--------------------
+
+curl -X POST https://virtualseguros.cl/api/recibe_poliza_sura.php \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idSolicitud": "544366",
+    "idInspeccion": "540575",
+    "patente": "JBFZ11",
+    "aprueba_rechaza_inspeccion": "Aprobado",
+    "motivo_cancelacion": "",
+    "motivo_rechazo_distinto_danio": ""
+  }'
+ 
+----------------------------------
+ 
+curl -X POST https://virtualseguros.cl/api/recibe_poliza_sura.php \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idSolicitud": "544499",
+    "idInspeccion": "540595",
+    "patente": "JBFZ11",
+    "aprueba_rechaza_inspeccion": "Aprobado",
+    "motivo_cancelacion": "",
+    "motivo_rechazo_distinto_danio": ""
+  }'
+ 
+----------------------------------
+ 
+curl -X POST https://virtualseguros.cl/api/recibe_poliza_sura.php \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idSolicitud" : "544998",
+    "idInspeccion" : "540603",
+    "patente" : "GZRB75",
+    "aprueba_rechaza_inspeccion" : "Aprobado",
+    "motivo_cancelacion" : "",
+    "motivo_rechazo_distinto_danio" : ""
+	}'
