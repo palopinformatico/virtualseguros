@@ -17,19 +17,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['archivo'])) {
         $uso = $usuario['uso'];
     } else {
         echo "No hay datos de usuario en la sesión.";
+        exit;
     }
 	
 	$fechaHora = date('Y-m-d');
 
-    // Generar un ID 煤nico (puedes cambiarlo por tu propia l贸gica)
     $nuevo_nombre = $rut . '_factura_'.$fechaHora.'.' . pathinfo($_FILES['archivo']['name'], PATHINFO_EXTENSION);
 
-    // Obtener ruta de uploads de WordPress
-    //$upload_dir = wp_upload_dir();
-    //$destino = trailingslashit($upload_dir['path']) . $nuevo_nombre;
     $destino ="/home/virtualseguros/public_html/uploads/". $nuevo_nombre;
 
-    // Usar funci贸n de WordPress para manejar la subida
     require_once(ABSPATH . 'wp-admin/includes/file.php');
     $moved_file = wp_handle_upload(
         $_FILES['archivo'],
@@ -37,41 +33,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['archivo'])) {
     );
 
     if ($moved_file && !isset($moved_file['error'])) {
-        // Renombrar el archivo en la carpeta
         rename($moved_file['file'], $destino);
-        //echo "Archivo subido como: " . $nuevo_nombre." en ".$destino;
     } else {
         echo "Error al subir el archivo: " . $moved_file['error'];
+        exit;
     }
     
-    //capturar uuid
     if (isset($_SESSION['uuid'])) {
         $uuid = $_SESSION['uuid'];
         
         wp_custom_log("uuid en generar.poliza".$uuid);
-        //Se genera poliza
         $url = "https://hub-qa.segurossura.cl/seguros-transversales/oneclick/v1/token_enrollment/subscription-detail/" . $uuid;
     	$token = recuperarToken();
         
-        // Inicializa cURL
         $ch = curl_init();
         
-        // Headers requeridos
         $headers = [
             "Ocp-Apim-Subscription-Key: 9b17ac14f09d44a2baadba510066cf22",
             "Authorization: ".$token
         ];
         
-        // Opciones de cURL
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // solo si hay problemas con el certificado
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         
-        // Ejecuta la petición
         $response = curl_exec($ch);
         
-        // Manejo de errores
         if (curl_errno($ch)) {
             echo 'Error en cURL: ' . curl_error($ch);
             curl_close($ch);
@@ -80,15 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['archivo'])) {
         
         curl_close($ch);
         
-        // Decodifica la respuesta JSON
         $data = json_decode($response, true);
         
-        // Verifica si se recibió correctamente y extrae el paymentMethodId
         if (isset($data['paymentMethodId'])) {
             $paymentMethodId = $data['paymentMethodId'];
-            //echo "El paymentMethodId es: " . $paymentMethodId;
             
-            //$fecha = date('Y-m-d');
             $fecha = date('Y-m-d', strtotime($fecha . ' -1 day'));
             $anio = date('Y');
             $NumeroChasis = $_SESSION['NumeroChasis'];
@@ -97,7 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['archivo'])) {
             $cotizacionServicioID = $_SESSION['cotizacionServicioID'];
             $tipoVehSeleccionado = $_SESSION['tipoVehSeleccionado'];
             
-            // Si tienes la extensión intl
             $tipoVehSeleccionado = Normalizer::normalize($tipoVehSeleccionado, Normalizer::FORM_D);
             $tipoVehSeleccionado = preg_replace('/\p{Mn}/u', '', $tipoVehSeleccionado);
 
@@ -120,23 +103,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['archivo'])) {
                 $comuna = htmlspecialchars($usuario['comuna']);
                 $genero = htmlspecialchars($usuario['genero']);
                 $direccion = htmlspecialchars($usuario['direccion']);
-                $email = htmlspecialchars($usuario['email']);
                 
             } else {
                 echo "No hay datos del usuario.";
+                exit;
             }
             
-            //dejar archivo en base64
             $file_content = file_get_contents($destino);
-        
-            // Codifica en Base64
             $base64_string = base64_encode($file_content);
-        
-            // Si quieres incluir el tipo MIME (útil para imágenes, PDFs, etc.)
             $mime_type = mime_content_type($destino);
             $base64_with_prefix = 'data:' . $mime_type . ';base64,' . $base64_string;
         
-            //llamar api generar poliza
             $url = 'https://hub-qa.segurossura.cl/seguros-generales/vechiculos-cotizacion/?soapAction=http%3A%2F%2Fws.rsa.cl%2FWsIndustrializacion%2FGenerarPoliza';
             
             $xmlBody = <<<XML
@@ -271,7 +248,6 @@ XML;
             curl_setopt($ch, CURLOPT_POSTFIELDS, $xmlBody);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            // Para entornos de prueba donde el certificado puede ser inválido
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             
             $response = curl_exec($ch);
@@ -291,70 +267,74 @@ XML;
     		
             $_SESSION['numeroPoliza'] = $numeroPoliza;
             
-            $lines = explode("\n", $response);
-            $boundary = trim($lines[1]); // primera línea como boundary
+            // Verificar si la respuesta contiene un PDF adjunto
+            $pdfEncontrado = false;
             
-            // Divide la respuesta en partes
-            $parts = explode($boundary, $response);
-            
-            // Itera para encontrar el PDF (usualmente en la segunda parte)
-            foreach ($parts as $part) {
-                if (strpos($part, 'application/octet-stream') !== false) {
-                    
-                    // El contenido viene después de los headers de esta parte
-                    list(, $pdfContent) = explode("\r\n\r\n", $part, 2);
-                    $pdfContent = trim($pdfContent);
-            
-                    // Guardar archivo
-                    $destinoPol ="/home/virtualseguros/public_html/polizas/";
-                    file_put_contents($destinoPol.$rut."_poliza.pdf", $pdfContent);
-                    //echo "PDF guardado exitosamente.";
-                    
-                    //enviar adjunto por correo
-                    // Configuración del correo
-                    $mail = new PHPMailer(true);
+            if (strpos($response, 'application/octet-stream') !== false) {
+                // Respuesta multipart con PDF (formato antiguo)
+                $lines = explode("\n", $response);
+                $boundary = trim($lines[1]);
                 
-                    try {
-                        // Configuración SMTP
-                        $mail->isSMTP();
-                        $mail->Host = 'mail.virtualseguros.cl'; // reemplaza con tu dominio
-                        $mail->SMTPAuth = true;
-                        $mail->Username = 'api@virtualseguros.cl'; // tu correo creado en Banahosting
-                        $mail->Password = 'PVXpGskaSzY7N#R';
-                        $mail->SMTPSecure = 'ssl'; // o 'tls' dependiendo del servidor
-                        $mail->Port = 465; // o 587 para TLS
+                $parts = explode($boundary, $response);
                 
-                        $mail->setFrom('api@virtualseguros.cl', 'API Inspección');
-                        $mail->addAddress($email);
+                foreach ($parts as $part) {
+                    if (strpos($part, 'application/octet-stream') !== false) {
                         
-                        $ruta_archivo = ABSPATH . "polizas/".$rut."_poliza.pdf";
-                        // Adjuntar archivo
-                        $mail->addAttachment($ruta_archivo);
+                        list(, $pdfContent) = explode("\r\n\r\n", $part, 2);
+                        $pdfContent = trim($pdfContent);
                 
-                        $mail->isHTML(true);
-                        $mail->Subject = "Poliza de seguro automotriz";
-                
-                        $mail->Body = "
-                            <h2>Virtual Seguros</h2>
-                            <p>Adjuntamos tu poliza</p>
-                        ";
-                
-                        $mail->send();
-                
-                        //echo json_encode(["mensaje" => "Correo enviado correctamente."]);
-                        
-                        ini_set('display_errors', 1);
-                        error_reporting(E_ALL);
-
-                        // Redireccionar a la URL de LAP
-                        header("Location: lap-solicitud");
-                        exit;
-                
-                    } catch (Exception $e) {
-                        http_response_code(500);
-                        echo json_encode(["error" => "Error al enviar correo: " . $mail->ErrorInfo]);
+                        $destinoPol ="/home/virtualseguros/public_html/polizas/";
+                        file_put_contents($destinoPol.$rut."_poliza.pdf", $pdfContent);
+                        $pdfEncontrado = true;
+                        break;
                     }
                 }
+            }
+            
+            // Enviar correo (con o sin PDF)
+            $mail = new PHPMailer(true);
+        
+            try {
+                $mail->isSMTP();
+                $mail->CharSet = 'UTF-8';
+                $mail->Host = 'mail.virtualseguros.cl';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'api@virtualseguros.cl';
+                $mail->Password = 'PVXpGskaSzY7N#R';
+                $mail->SMTPSecure = 'ssl';
+                $mail->Port = 465;
+        
+                $mail->setFrom('api@virtualseguros.cl', 'Atención al cliente Virtual Seguros');
+                $mail->addAddress($email);
+                
+                if ($pdfEncontrado) {
+                    $ruta_archivo = ABSPATH . "polizas/".$rut."_poliza.pdf";
+                    $mail->addAttachment($ruta_archivo);
+                    $mail->Body = "
+                        <h2>Virtual Seguros</h2>
+                        <p>Adjuntamos tu poliza</p>
+                    ";
+                } else {
+                    $mail->Body = "
+                        <h2>Virtual Seguros</h2>
+                        <p>Tu poliza ha sido generada exitosamente.</p>
+                        <p><strong>Número de póliza: $numeroPoliza</strong></p>
+                        <p>El PDF de la póliza será enviado en breve.</p>
+                    ";
+                }
+        
+                $mail->isHTML(true);
+                $mail->Subject = "Poliza de seguro automotriz";
+        
+                $mail->send();
+        
+                // Devolver JSON indicando éxito
+                echo json_encode(["success" => true, "redirect" => "lap-solicitud"]);
+                exit;
+        
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(["error" => "Error al enviar correo: " . $mail->ErrorInfo]);
             }
     
     

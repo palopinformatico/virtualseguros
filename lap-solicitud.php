@@ -160,10 +160,10 @@ if (isset($_SESSION['usuario'])) {
             <br>
             <br>
                 <div class="card shadow">
-                    <h3 class="text-center mb-4 fw-bold">Generar solicitud LAP</h3>
+                    <h3 class="text-center mb-4 fw-bold">Generar solicitud GPS</h3>
     				<form method="post" action="/finaliza">
                         <div class="mb-3 fw-bold">
-                            <label>Solicitar LAP:<span style="color: red;">*</span></label><br>
+                            <label>Solicitar GPS:<span style="color: red;">*</span></label><br>
                             <div class="form-check">
                                 <input type="radio" name="solicitaLap" class="form-check-input" value="1" required checked style="outline: 2px solid green;"> Acepta
                             </div>
@@ -182,7 +182,7 @@ if (isset($_SESSION['usuario'])) {
             <br>
     
     <?php else: ?>
-        <h2>Error al generar solicitud LAP</h2>
+        <h2>Error al generar solicitud GPS</h2>
         <p>Codigo HTTP: <?= $httpCode ?></p>
         <pre><?= isset($error_msg) ? $error_msg : htmlspecialchars($response) ?></pre>
     <?php endif; ?>

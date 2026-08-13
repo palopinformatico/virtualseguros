@@ -365,14 +365,25 @@ function renderizarTarjetaSeguro($seguro) {
 		echo '                <li><span class="check-icon">&#10003;</span> ' . htmlspecialchars($cubierta) . '</li>';
 	}
 	echo '            </ul>';
-	echo '            <a href="#" class="more-details">Más detalles y coberturas</a>';
+	echo '            <a href="#" class="more-details" onclick="togglePopup(event, \'' . $seguro['nombre_plan'] . '\')">Más detalles y coberturas</a>';
+	echo '            <div id="coverage-popup-' . $seguro['nombre_plan'] . '" class="coverage-popup">';
+	echo '                <div class="popup-content">';
+	echo '                    <span class="close-popup" onclick="togglePopup(event, \'' . $seguro['nombre_plan'] . '\')">&times;</span>';
+	echo '                    <h3>Coberturas Completas</h3>';
+	echo '                    <ul class="popup-coverage-list">';
+	foreach ($seguro['detalle_coberturas'] as $detalle_coberturas) {
+		echo '                <li>' . htmlspecialchars($detalle_coberturas) . '</li>';
+	}
+	echo '                    </ul>';
+	echo '                </div>';
+	echo '            </div>';
 	echo '        </div>';
 	echo '        <div class="price-section">';
 	echo '            <span class="price-clp">$ ' . number_format(htmlspecialchars($seguro['precio_clp_aprox']) / 12, 0, ',', '.') . ' aprox</span>';
 	echo '            <span class="price-uf">UF ' . number_format($seguro['uf_anual'] / 12, 2, ',', '') . ' mensual</span>';
 		// Aquí el formulario POST
 	echo '            <form method="POST" action="/datos-bien">';
-	echo '                <input type="hidden" name="nombrePlan" value="' . htmlspecialchars($seguro['titulo_seguro']) . '">';
+	echo '                <input type="hidden" name="nombrePlan" value="' . htmlspecialchars($seguro['nombre_plan']) . '">';
 	echo '                <input type="hidden" name="precio_clp" value="' . htmlspecialchars($seguro['precio_clp_aprox'] / 12) . '">';
 	echo '                <input type="hidden" name="cotizacionServicioID" value="' . htmlspecialchars($seguro['cotizacionServicioID']) . '">';
 	echo '                <input type="hidden" name="csrf_token" value="fla857"/>';

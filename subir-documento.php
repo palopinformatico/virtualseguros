@@ -289,6 +289,7 @@ if ($esNuevo == 'Usado'){
 			try {
 				// Configuración SMTP
 				$mail->isSMTP();
+				$mail->CharSet = 'UTF-8';
 				$mail->Host = 'mail.virtualseguros.cl'; // reemplaza con tu dominio
 				$mail->SMTPAuth = true;
 				$mail->Username = 'api@virtualseguros.cl'; // tu correo
@@ -296,7 +297,7 @@ if ($esNuevo == 'Usado'){
 				$mail->SMTPSecure = 'ssl'; // o 'tls' dependiendo del servidor
 				$mail->Port = 465; // o 587 para TLS
 
-				$mail->setFrom('api@virtualseguros.cl', 'API Inspección');
+				$mail->setFrom('api@virtualseguros.cl', 'Atención al cliente Virtual Seguros');
 				$mail->addAddress($email);
 				
 				$mail->isHTML(true);
@@ -351,6 +352,20 @@ if ($esNuevo == 'Usado'){
 		padding: 8px;
 		width: 200px;
 	}
+	
+	#facturaForm label {
+		display: block;
+		width: 100%;
+		margin-bottom: 2px;
+	}
+	
+	#facturaForm input[type="file"],
+	#facturaForm input[type="date"] {
+		width: 100%;
+		padding: 8px;
+		box-sizing: border-box;
+		margin-bottom: 10px;
+	}
 	.container {
 		margin: 50px;
 	}
@@ -371,6 +386,86 @@ if ($esNuevo == 'Usado'){
 		background-color: #fff;
 		padding: 30px;
 	}
+	
+	.modal {
+		display: none;
+		position: fixed;
+		z-index: 1000;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0, 0, 0, 0.5);
+	}
+	
+	.modal-content {
+		background-color: #fff;
+		margin: 15% auto;
+		padding: 20px;
+		border-radius: 5px;
+		width: 80%;
+		max-width: 500px;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+	
+	.modal-buttons {
+		margin-top: 20px;
+		text-align: right;
+	}
+	
+	.modal-buttons button {
+		margin-left: 10px;
+		padding: 8px 16px;
+		border-radius: 5px;
+		cursor: pointer;
+		border: none;
+	}
+	
+	.btn-aceptar {
+		background-color: #3CB043;
+		color: white;
+	}
+	
+	.btn-cancelar {
+		background-color: #6c757d;
+		color: white;
+	}
+	
+	.spinner-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .spinner-message {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #333;
+        text-align: center;
+        padding: 0 20px;
+    }
 </style>
 
 <?php if ($esNuevo == 'Nuevo'): ?>
@@ -382,14 +477,16 @@ if ($esNuevo == 'Usado'){
             <div class="form-group">
                 <p>Subir Factura</p>
             </div>
-            <label for="archivo">Selecciona un archivo:</label><br><br>
+            <label for="archivo">Selecciona un archivo (tamaño máximo 2MB):</label>
             <input type="hidden" name="MAX_FILE_SIZE" value="2097152">
-            <input type="file" name="archivo" id="archivo" required><br>
+            <input type="file" name="archivo" id="archivo" required>
     
             <!-- Mensaje de error -->
             <div id="mensajeError" style="color: red; font-weight: bold; margin-top: 10px;"></div>
     
-            <br>
+            <label for="fechaFactura">Fecha de Factura:</label>
+            <input type="date" name="fechaFactura" id="fechaFactura" required>
+            
 			<input type='hidden' name='csrf_token' value='loq420'/>
             <div class="text-end">
                 <button class="btn btn-success" type="submit">Subir factura y continuar</button>
@@ -397,6 +494,24 @@ if ($esNuevo == 'Usado'){
         </form>
     </div>
     <br>
+
+    <!-- Spinner overlay -->
+    <div class="spinner-overlay" id="spinnerOverlay">
+        <div class="spinner"></div>
+        <div class="spinner-message">Se está generando su póliza, por favor espere un momento, no cierre la ventana</div>
+    </div>
+
+    <!-- Modal de advertencia -->
+    <div id="modalAdvertencia" class="modal">
+        <div class="modal-content">
+            <h3>Nota</h3>
+            <p>Factura, guía de despacho o acta de entrega menor a 10 días</p>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancelar" onclick="cerrarModal()">Continuar</button>
+                <button type="button" class="btn-aceptar" onclick="aceptarRedireccion()">Volver al inicio</button>
+            </div>
+        </div>
+    </div>
 
 <?php else: ?>
 
@@ -423,20 +538,92 @@ if ($esNuevo == 'Usado'){
 const archivoInput = document.getElementById("archivo");
 const mensajeError = document.getElementById("mensajeError");
 const form = document.getElementById("facturaForm");
+const fechaFacturaInput = document.getElementById("fechaFactura");
+const modalAdvertencia = document.getElementById("modalAdvertencia");
+
+// Establecer fecha de hoy por defecto
+const hoy = new Date();
+const fechaHoy = hoy.toISOString().split('T')[0];
+fechaFacturaInput.value = fechaHoy;
+
+// Función para calcular diferencia en días entre dos fechas
+function diferenciaDias(fecha1, fecha2) {
+    const unDia = 24 * 60 * 60 * 1000;
+    const diff = Math.abs((new Date(fecha1) - new Date(fecha2)) / unDia);
+    return diff;
+}
+
+// Validar fecha de factura al cambiar
+fechaFacturaInput.addEventListener("change", function () {
+    const fechaSeleccionada = this.value;
+    const diffDias = diferenciaDias(fechaHoy, fechaSeleccionada);
+    
+    if (diffDias > 10) {
+        modalAdvertencia.style.display = "block";
+    }
+});
+
+// Función para cerrar modal
+function cerrarModal() {
+    modalAdvertencia.style.display = "none";
+}
+
+// Función para aceptar y redireccionar
+function aceptarRedireccion() {
+    window.location.href = "https://virtualseguros.cl/cotizador/";
+}
 
 form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    
     const archivo = archivoInput.files[0];
     mensajeError.textContent = "";
 
     if (archivo && archivo.size > 2097152) { // 2 MB
-        e.preventDefault();
         mensajeError.textContent = "El archivo no debe superar los 2 MB.";
+        return;
     }
 
     if (archivo && archivo.size == 0) { // 0 MB
-        e.preventDefault();
         mensajeError.textContent = "El archivo no debe estar vacío.";
+        return;
     }
+    
+    // Validar fecha de factura al submit
+    const fechaSeleccionada = fechaFacturaInput.value;
+    const diffDias = diferenciaDias(fechaHoy, fechaSeleccionada);
+    
+    if (diffDias > 10) {
+        modalAdvertencia.style.display = "block";
+        return;
+    }
+    
+    // Mostrar spinner
+    document.getElementById('spinnerOverlay').style.display = 'flex';
+    
+    // Enviar por AJAX
+    const formData = new FormData(form);
+    
+    fetch('/generar-poliza', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.redirect) {
+            window.location.href = '/' + data.redirect;
+        } else if (data.error) {
+            document.getElementById('spinnerOverlay').style.display = 'none';
+            mensajeError.textContent = 'Error: ' + data.error;
+        } else {
+            document.getElementById('spinnerOverlay').style.display = 'none';
+            mensajeError.textContent = 'Error desconocido al procesar la solicitud';
+        }
+    })
+    .catch(error => {
+        document.getElementById('spinnerOverlay').style.display = 'none';
+        mensajeError.textContent = 'Error al procesar: ' + error.message;
+    });
 });
 
 // Limpia el mensaje de error si el archivo es válido al seleccionar uno nuevo

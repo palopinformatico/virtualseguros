@@ -197,8 +197,8 @@ if (isset($_SESSION['usuario'])) {
         <h3 class="text-center mb-4 fw-bold">Proceso Finalizado</h3>
     	<form method="post" action="/">
     		<div>
-                <p>Nro de poliza <?=$numeroPoliza?></p>
-                <p>La poliza ha sido generada y enviada a su email.</p>
+                <p><strong>Póliza <?=$numeroPoliza?></strong></p>
+                <p>La póliza ha sido generada y enviada a su email.</p>
                 <p>En caso de no ver el email revise su carpeta de spam.</p>
                 <p>Muchas gracias por adquirir su seguro con virtualseguros.cl</p>
     		</div>

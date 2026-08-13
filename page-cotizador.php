@@ -1,3 +1,4 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
 .step-container {
     display: flex;
@@ -39,6 +40,28 @@
 
 .btn-success:hover {
 	background-color: #5a6268;
+}
+
+.btn-close {
+	background-color: white !important;
+	position: absolute;
+	top: 15px;
+	right: 20px;
+	font-size: 28px;
+	cursor: pointer;
+	color: #666
+	line-height: 1;
+}
+
+.btn-close:hover {
+	background-color: white !important;
+	position: absolute;
+	top: 15px;
+	right: 20px;
+	font-size: 28px;
+	cursor: pointer;
+	color: #666;
+	line-height: 1;
 }
 </style>
 
@@ -380,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
               <label class="d-block">¿Nuevo o usado? <span class="text-danger">*</span></label>
               <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="esNuevo" id="esNuevoNuevo" value="Nuevo" required style="outline: 2px solid green;" checked>
-                <label class="form-check-label" for="esNuevoNuevo">Nuevo (solo si es del año actual)</label>
+                <label class="form-check-label" for="esNuevoNuevo">Nuevo (factura o acta de entrega menor a 10 días)</label>
               </div>
               <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="esNuevo" id="esNuevoUsado" value="Usado" style="outline: 2px solid green;">
@@ -406,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
             
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="terminos" name="terminos" required style="outline: 2px solid green;">
-                <label class="form-check-label fw-bold"><span style="color: red;">*</span> Acepto <a href="#">Términos y Condiciones</a></label>
+                <label class="form-check-label fw-bold"><span style="color: red;">*</span> Acepto <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#modalDatos">Términos y Condiciones</a></label>
             </div>
 			<input type='hidden' name='csrf_token' value='los422'/>
             <div class="d-flex justify-content-between">
@@ -418,6 +441,26 @@ document.addEventListener('DOMContentLoaded', function () {
         <input type="hidden" name="nombre_modelo" id="nombre_modelo">
         <input type="hidden" name="nombre_comuna" id="nombre_comuna">
     </form>
+</div>
+
+<!-- Modal Tratamiento de Datos -->
+<div class="modal fade" id="modalDatos" tabindex="-1" aria-labelledby="modalDatosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDatosLabel">Tratamientos de datos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Autorizo a que mis datos personales sean tratados por Virtual Seguros conforme a la Ley N°19.628 sobre Protección de la Vida Privada.</p>
+                <p>Asimismo, autorizo a comunicar, transmitir, y/o proporcionar a Virtual Seguros, y a los proveedores de las mismas, los datos de carácter personal, únicamente para: (i) dar cumplimiento a las obligaciones estipuladas en las pólizas contratadas y a toda obligación de acuerdo a la normativa vigente; (ii) preparar, implementar, promocionar y ofrecer al asegurado, beneficiario y/o contratante, productos y servicios que consideren que pueden ser de interés; iii) acceder a, procesar y tratar esta información, a fin de ajustar la oferta de productos y servicios al perfil del asegurado, beneficiario y/o contratante, o bien, efectuar análisis y evaluaciones a su respecto; (iv) desarrollar acciones comerciales o servicios post venta, de carácter general o dirigidas personalmente al asegurado, beneficiario y/o contratante.</p>
+                <p>Los datos entregados no serán puestos en conocimiento del público, salvo lo expuesto en este documento. En todo momento el asegurado, beneficiario y/o contratante podrá revocar su autorización, y dispondrá siempre de los derechos de aclaración, rectificación, cancelación y oposición, y todos los demás derechos que confiere la Ley N° 19.628 sobre Protección de la Vida Privada.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -552,3 +595,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

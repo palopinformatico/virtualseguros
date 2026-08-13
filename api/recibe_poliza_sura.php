@@ -397,6 +397,7 @@ XML;
                         try {
                             // Configuración SMTP
                             $mail->isSMTP();
+                            $mail->CharSet = 'UTF-8';
                             $mail->Host = 'mail.virtualseguros.cl'; // reemplaza con tu dominio
                             $mail->SMTPAuth = true;
                             $mail->Username = 'api@virtualseguros.cl'; // tu correo creado en Banahosting
@@ -404,7 +405,7 @@ XML;
                             $mail->SMTPSecure = 'ssl'; // o 'tls' dependiendo del servidor
                             $mail->Port = 465; // o 587 para TLS
                     
-                            $mail->setFrom('api@virtualseguros.cl', 'API Inspección');
+                            $mail->setFrom('api@virtualseguros.cl', 'Atención al cliente Virtual Seguros');
                             $mail->addAddress($email);
                             
                             $ruta_archivo = ABSPATH . "polizas/".$rut."_poliza.pdf";
@@ -502,6 +503,7 @@ XML;
         try {
             // Configuración SMTP
             $mail->isSMTP();
+            $mail->CharSet = 'UTF-8';
             $mail->Host = 'mail.virtualseguros.cl'; // reemplaza con tu dominio
             $mail->SMTPAuth = true;
             $mail->Username = 'api@virtualseguros.cl'; // tu correo creado en Banahosting
@@ -509,7 +511,7 @@ XML;
             $mail->SMTPSecure = 'ssl'; // o 'tls' dependiendo del servidor
             $mail->Port = 465; // o 587 para TLS
     
-            $mail->setFrom('api@virtualseguros.cl', 'API Inspección');
+            $mail->setFrom('api@virtualseguros.cl', 'Atención al cliente Virtual Seguros');
             $mail->addAddress($email); //correo de destino
     
             $mail->isHTML(true);
