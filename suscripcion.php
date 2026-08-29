@@ -164,7 +164,12 @@ if (isset($_SESSION['usuario'])) {
         }
 
         // Redireccionar a la URL
-        header("Location: " . $urlSuscripcion);
+        echo '<!doctype html><html><head><meta charset="utf-8">';
+        echo '<meta http-equiv="refresh" content="0;url=' . esc_attr($urlSuscripcion) . '">';
+        echo '</head><body>';
+        echo '<script>try{window.top.location.href = "' . esc_js($urlSuscripcion) . '";}catch(e){window.location.href = "' . esc_js($urlSuscripcion) . '";}</script>';
+        echo '<noscript><a href="' . esc_attr($urlSuscripcion) . '">Continuar</a></noscript>';
+        echo '</body></html>';
         exit;
     } else {
         echo "Error al obtener la URL de suscripci贸n.";

@@ -56,6 +56,89 @@ $fechaHora = date('Y-m-d H:i:s');
 $linea = "fecha: $fechaHora; nombre: $nombre; rut: $rutCompleto; fecha_nacimiento: $fecha_nacimiento; anio: $anio; codmarca: $marca; marca: $nombre_marca; codmodelo: $modelo; modelo: $nombre_modelo; codcomuna: $comuna;  comuna: $nombre_comuna; patente: $patente; uso: $uso;\n";
 file_put_contents("cotizaciones.txt", $linea, FILE_APPEND | LOCK_EX);
 
+echo "<h3 style='color: #333;'>Elige el plan a tu medida</h3>";
+
+// Sección de opciones (radiobuttons) para Opcionales - con estilos
+?>
+<style>
+.opcionales-bar {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	margin: 18px 0;
+	border: 2px solid #d0d0d0;
+	padding: 12px 16px;
+	border-radius: 8px;
+	background: #fff;
+}
+.opc-grupo { display:flex; gap:12px; align-items:center; width:100%; }
+.opc-grupo label { display:flex; align-items:center; gap:8px; font-size:13px; color:#222; }
+.opc-options { display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+.opc-grupo .opc-title { font-weight:600; margin-right:8px; flex: 0 0 130px; }
+.opc-column { display:flex; gap:18px; align-items:flex-start; flex-direction:column; flex:1 1 0; min-width:0; }
+.opc-radio { width:16px; height:16px; }
+.tooltip-icon { position: relative; display: inline-block; width: 20px; height: 20px; background-color: #007bff; color: white; border-radius: 50%; text-align: center; line-height: 20px; font-size: 12px; font-weight: bold; cursor: help; margin-left: 4px; }
+.tooltip-icon .tooltip { visibility: hidden; width: 200px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -100px; opacity: 0; transition: opacity 0.3s; font-size: 12px; font-weight: normal; line-height: 1.4; white-space: normal; }
+.tooltip-icon .tooltip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
+.tooltip-icon:hover .tooltip { visibility: visible; opacity: 1; }
+.btn-cotizar { background:#19a974 !important; color:#fff !important; border:none !important; padding:10px 26px !important; border-radius:6px !important; font-weight:700 !important; }
+@media(max-width:768px){ 
+	.opcionales-bar{flex-direction:column; align-items:flex-start;} 
+	.opc-column{flex-direction:column; width:100%;}
+	.opc-grupo .opc-title{min-width:unset;}
+}
+/* Apilar opciones del primer grupo (AutoReemplazo) en columna */
+.opc-column:first-child .opc-options { flex-direction: column; align-items: flex-start; }
+</style>
+
+<form method="post" id="opcionalesForm">
+	<div class="opcionales-bar">
+		<div class="opc-column">
+			<div class="opc-grupo">
+				<span class="opc-title">AutoReemplazo:</span>
+				<div class="opc-options">
+					<label><input class="opc-radio" type="radio" name="opc_autoReemplazo" value="QuinceDias" <?php echo (!isset($_POST['opc_autoReemplazo']) || $_POST['opc_autoReemplazo'] === 'QuinceDias') ? 'checked' : ''; ?>> 15 dias</label>
+					<label><input class="opc-radio" type="radio" name="opc_autoReemplazo" value="TreintaDias" <?php echo (isset($_POST['opc_autoReemplazo']) && $_POST['opc_autoReemplazo'] === 'TreintaDias') ? 'checked' : ''; ?>> 30 dias</label>
+					<label><input class="opc-radio" type="radio" name="opc_autoReemplazo" value="CuarentayCincoDias" <?php echo (isset($_POST['opc_autoReemplazo']) && $_POST['opc_autoReemplazo'] === 'CuarentayCincoDias') ? 'checked' : ''; ?>> 45 dias</label>
+					<label><input class="opc-radio" type="radio" name="opc_autoReemplazo" value="Ilimitado" <?php echo (isset($_POST['opc_autoReemplazo']) && $_POST['opc_autoReemplazo'] === 'Ilimitado') ? 'checked' : ''; ?>> Ilimitado</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="opc-column">
+			<div class="opc-grupo">
+				<span class="opc-title">Taller:</span>
+				<div class="opc-options">
+					<label><input class="opc-radio" type="radio" name="opc_taller" value="MultiMarca" <?php echo (!isset($_POST['opc_taller']) || $_POST['opc_taller'] === 'MultiMarca') ? 'checked' : ''; ?>> MultiMarca <span class="tooltip-icon">?<span class="tooltip">TALLER MULTIMARCA : Taller en convenio que repara de todas las marcas, puede usar repuestos alternativos</span></span></label>
+					<label><input class="opc-radio" type="radio" name="opc_taller" value="TallerdeMarca" <?php echo (isset($_POST['opc_taller']) && $_POST['opc_taller'] === 'TallerdeMarca') ? 'checked' : ''; ?>> Taller de Marca <span class="tooltip-icon">?<span class="tooltip">TALLER DE MARCA : Se repara en el lugar donde usted compró el vehiculo o en otro taller concesionario de la Marca, solo usa repuestos originales.</span></span></label>
+					<label><input class="opc-radio" type="radio" name="opc_taller" value="TallerGarantia" <?php echo (isset($_POST['opc_taller']) && $_POST['opc_taller'] === 'TallerGarantia') ? 'checked' : ''; ?>> Taller Garantía <span class="tooltip-icon">?<span class="tooltip">TALLER GARANTIA : Se repara en el lugar donde usted compró el vehiculo o en otro taller concesionario de la Marca, durante el tiempo que el vehiculo esté en garantia.</span></span></label>
+				</div>
+			</div>
+		</div>
+
+		<div class="opc-column">
+			<div class="opc-grupo">
+				<span class="opc-title">RCExceso:</span>
+				<div class="opc-options">
+					<label><input class="opc-radio" type="radio" name="opc_rCExceso" value="SinOpcional" <?php echo (!isset($_POST['opc_rCExceso']) || $_POST['opc_rCExceso'] === 'SinOpcional') ? 'checked' : ''; ?>> Sin RCexceso</label>
+					<label><input class="opc-radio" type="radio" name="opc_rCExceso" value="MilUF" <?php echo (isset($_POST['opc_rCExceso']) && $_POST['opc_rCExceso'] === 'MilUF') ? 'checked' : ''; ?>> 1.000 UF</label>
+					<label><input class="opc-radio" type="radio" name="opc_rCExceso" value="DosMilUF" <?php echo (isset($_POST['opc_rCExceso']) && $_POST['opc_rCExceso'] === 'DosMilUF') ? 'checked' : ''; ?>> 2.000 UF</label>
+					<label><input class="opc-radio" type="radio" name="opc_rCExceso" value="TresMilUF" <?php echo (isset($_POST['opc_rCExceso']) && $_POST['opc_rCExceso'] === 'TresMilUF') ? 'checked' : ''; ?>> 3.000 UF</label>
+				</div>
+			</div>
+		</div>
+
+		<div style="margin-left:auto;">
+			<input type="hidden" name="accion" value="cotizarOpc">
+			<?php if (isset($cotizacionServicioID)) : ?>
+				<input type="hidden" name="cotizacionServicioID" value="<?php echo htmlspecialchars($cotizacionServicioID); ?>">
+			<?php endif; ?>
+			<button type="submit" class="btn-cotizar">COTIZAR</button>
+		</div>
+	</div>
+</form>
+<?php
+
 //crearPrimeraCotizacion($amaterno, $apaterno, $comuna, $fecha_nacimiento, $nombre, $rut, $anio, $marca, $modelo, $patente, $uso);
 
 $url = 'https://hub-qa.segurossura.cl/seguros-generales/vechiculos-cotizacion';
@@ -67,6 +150,46 @@ $headers = [
 	'Authorization'=> 'Bearer ' . $token,
 	'Ocp-Apim-Subscription-Key' => '712c61e9edff4ad4842111902b1dcf18',
 ];
+
+// Opcionales: tomar desde POST si el usuario envió el formulario, sino usar los valores por defecto
+$opc_autoReemplazo = isset($_POST['opc_autoReemplazo']) ? sanitize_text_field($_POST['opc_autoReemplazo']) : 'QuinceDias';
+$opc_rCExceso = isset($_POST['opc_rCExceso']) ? sanitize_text_field($_POST['opc_rCExceso']) : 'SinOpcional';
+$opc_taller = isset($_POST['opc_taller']) ? sanitize_text_field($_POST['opc_taller']) : 'MultiMarca';
+
+// Guardar opcionales en sesión para usar después
+$_SESSION['opc_autoReemplazo'] = $opc_autoReemplazo;
+$_SESSION['opc_taller'] = $opc_taller;
+$_SESSION['opc_rCExceso'] = $opc_rCExceso;
+
+// Función para mapear autoReemplazo a texto legible
+function obtenerTextoAutoReemplazo($opc_autoReemplazo) {
+	switch($opc_autoReemplazo) {
+		case 'QuinceDias':
+			return '15 días';
+		case 'TreintaDias':
+			return '30 días';
+		case 'CuarentayCincoDias':
+			return '45 días';
+		case 'Ilimitado':
+			return 'ilimitados';
+		default:
+			return 'ilimitados';
+	}
+}
+
+// Función para mapear taller a texto legible
+function obtenerTextoTaller($opc_taller) {
+	switch($opc_taller) {
+		case 'TallerdeMarca':
+			return 'Taller de Marca';
+		case 'TallerGarantia':
+			return 'Taller Garantía';
+		case 'MultiMarca':
+			return 'MultiMarca';
+		default:
+			return 'MultiMarca';
+	}
+}
 
 $body = <<<XML
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.rsa.cl/" xmlns:epv="http://schemas.datacontract.org/2004/07/EPV.Servicios.Services">
@@ -109,9 +232,9 @@ $body = <<<XML
 		</ws:DatosBien>
 		<ws:Opcionales>
 			<ws:asistencias>SinOpcional</ws:asistencias>
-			<ws:autoReemplazo>SinOpcional</ws:autoReemplazo>
-			<ws:rCExceso>SinOpcional</ws:rCExceso>
-			<ws:taller>SinOpcional</ws:taller>
+			<ws:autoReemplazo>{$opc_autoReemplazo}</ws:autoReemplazo>
+			<ws:rCExceso>{$opc_rCExceso}</ws:rCExceso>
+			<ws:taller>{$opc_taller}</ws:taller>
 		</ws:Opcionales>
 		</ws:CotizacionOferta>
 	</ws:CotizaOfertaRequest>
@@ -382,10 +505,17 @@ if (!isset($_SESSION['respuesta_api'])) {
 	echo "No hay resultados de la api para mostrar.";
 }
 
-if (isset($_SESSION['respuesta_api']) && $cotizacionServicioID === null) {
+	if (isset($_SESSION['respuesta_api']) && $cotizacionServicioID === null) {
 	
 	$respuesta = $_SESSION['respuesta_api'];
 	unset($_SESSION['respuesta_api']);
+
+	// Obtener opcionales de sesión
+	$opc_autoReemplazo_actual = isset($_SESSION['opc_autoReemplazo']) ? $_SESSION['opc_autoReemplazo'] : 'Ilimitado';
+	$opc_taller_actual = isset($_SESSION['opc_taller']) ? $_SESSION['opc_taller'] : 'MultiMarca';
+	
+	$textoAutoReemplazo = obtenerTextoAutoReemplazo($opc_autoReemplazo_actual);
+	$textoTaller = obtenerTextoTaller($opc_taller_actual);
 
 	// Formatea lo que quieras mostrar
 	//ob_start();
@@ -465,22 +595,19 @@ if (isset($_SESSION['respuesta_api']) && $cotizacionServicioID === null) {
 				$coberturas = [
 					'Full Cobertura',
 					'Perdida total (Valor comercial)',
-					'Responsabilidad Civil UF 700 c/u'
+					'Responsabilidad Civil UF 500 c/u'
 				];
 				$detalle_coberturas = [
-					'✅ Daños propios al vehículo',
 					'✅ Daños totales al vehículo',
 					'✅ Robo, Hurto, uso no Autorizado',
-					'✅ Responsabilidad Civil UF 700 c/u',
+					'✅ Responsabilidad Civil UF 500 c/u',
 					'✅ Actos Maliciosos',
 					'✅ Huelga y Terrorismo',
 					'✅ Riesgos de la naturaleza, Granizo / Sismo',
 					'✅ Daños por la propia carga',
-					'✅ Daños a tercero por la propia carga UF 700',
-					'✅ Defensa Penal y Constitución de Fianza UF 150',
-					'✅ Daños a 3° por Conductores Dependientes UF 700',
+					'✅ Daños a tercero por la propia carga',
+					'✅ Defensa Penal y Constitución de Fianza UF 50',
 					'✅ Asistencia al vehículo',
-					'✅ Daños materiales por Conductores Dependientes',
 					'✅ Asiento Pasajero Plan A y Plan B'
 				];
 			}
@@ -489,8 +616,35 @@ if (isset($_SESSION['respuesta_api']) && $cotizacionServicioID === null) {
 				$coberturas = [
 					'Full Cobertura',
 					'Daños Materiales (Valor comercial)',
+					'Responsabilidad Civil UF 500 c/u',
+					$textoTaller
+				];
+				$detalle_coberturas = [
+					'✅ Daños propios al vehículo',
+					'✅ Daños totales al vehículo',
+					'✅ Robo, Hurto, uso no Autorizado',
+					'✅ Responsabilidad Civil UF 500 c/u',
+					'✅ Actos Maliciosos',
+					'✅ Huelga y Terrorismo',
+					'✅ Riesgos de la naturaleza, Granizo / Sismo',
+					'✅ Daños por la propia carga',
+					'✅ Daños a tercero por la propia carga UF 500',
+					'✅ Robo de Accesorios',
+					'✅ Defensa Penal y Constitución de Fianza UF 50',
+					'✅ Deducible Resposable',
+					'✅ Taller de reparación ' . $textoTaller,
+					'✅ Auto de reemplazo ' . $textoAutoReemplazo,
+					'✅ Asistencia al vehículo',
+					'✅ Asiento Pasajero Plan A y Plan B'
+				];
+			}
+
+			if (str_contains($nombrePlan[$i], "FULL")) {
+				$coberturas = [
+					'Full Cobertura',
+					'Daños Materiales (Valor comercial)',
 					'Responsabilidad Civil UF 700 c/u',
-					'Taller Marca'
+					$textoTaller
 				];
 				$detalle_coberturas = [
 					'✅ Daños propios al vehículo',
@@ -503,41 +657,13 @@ if (isset($_SESSION['respuesta_api']) && $cotizacionServicioID === null) {
 					'✅ Daños por la propia carga',
 					'✅ Daños a tercero por la propia carga UF 700',
 					'✅ Robo de Accesorios',
-					'✅ Defensa Penal y Constitución de Fianza UF 150',
-					'✅ Daños a 3° por Conductores Dependientes UF 700',
-					'✅ Taller de reparación SURA',
-					'✅ Auto de reemplazo 30 días',
+					'✅ Defensa Penal y Constitución de Fianza UF 50',
+					'✅ Deducible Resposable',
+					'✅ Taller de reparación ' . $textoTaller,
+					'✅ Auto de reemplazo ' . $textoAutoReemplazo,
 					'✅ Asistencia al vehículo',
-					'✅ Daños materiales por Conductores Dependientes',
-					'✅ Asiento Pasajero Plan A y Plan B'
-				];
-			}
-
-			if (str_contains($nombrePlan[$i], "FULL")) {
-				$coberturas = [
-					'Full Cobertura',
-					'Daños Materiales (Valor comercial)',
-					'Responsabilidad Civil UF 1.000 c/u',
-					'Taller Marca'
-				];
-				$detalle_coberturas = [
-					'✅ Daños propios al vehículo',
-					'✅ Daños totales al vehículo',
-					'✅ Robo, Hurto, uso no Autorizado',
-					'✅ Responsabilidad Civil UF 1.000 c/u',
-					'✅ Actos Maliciosos',
-					'✅ Huelga y Terrorismo',
-					'✅ Riesgos de la naturaleza, Granizo / Sismo',
-					'✅ Daños por la propia carga',
-					'✅ Daños a tercero por la propia carga UF 1.000',
-					'✅ Robo de Accesorios',
-					'✅ Defensa Penal y Constitución de Fianza UF 150',
-					'✅ Daños a 3° por Conductores Dependientes UF 1.000',
-					'✅ Taller de reparación Garantía',
-					'✅ Auto de reemplazo 45 días',
-					'✅ Asistencia al vehículo',
-					'✅ Daños materiales por Conductores Dependientes',
-					'✅ Asiento Pasajero Plan A y Plan B'
+					'✅ Asiento Pasajero Plan A y Plan B',
+					'✅ Daños propios en el extranjero'
 				];
 			}
 				
@@ -615,6 +741,13 @@ if (isset($_SESSION['respuesta_api']) && $cotizacionServicioID !== null) {
 	
 	$cotizacionServicioID = htmlspecialchars(urldecode($cotizacionServicioID));
 
+	// Obtener opcionales de sesión
+	$opc_autoReemplazo_actual = isset($_SESSION['opc_autoReemplazo']) ? $_SESSION['opc_autoReemplazo'] : 'Ilimitado';
+	$opc_taller_actual = isset($_SESSION['opc_taller']) ? $_SESSION['opc_taller'] : 'MultiMarca';
+	
+	$textoAutoReemplazo = obtenerTextoAutoReemplazo($opc_autoReemplazo_actual);
+	$textoTaller = obtenerTextoTaller($opc_taller_actual);
+
 	$archivo = "consultas_detalle.txt";
 	
 	$nombrePlan   = [];
@@ -672,22 +805,19 @@ if (isset($_SESSION['respuesta_api']) && $cotizacionServicioID !== null) {
 				$coberturas = [
 					'Full Cobertura',
 					'Perdida total (Valor comercial)',
-					'Responsabilidad Civil UF 700 c/u'
+					'Responsabilidad Civil UF 500 c/u'
 				];
 				$detalle_coberturas = [
-					'✅ Daños propios al vehículo',
 					'✅ Daños totales al vehículo',
 					'✅ Robo, Hurto, uso no Autorizado',
-					'✅ Responsabilidad Civil UF 700 c/u',
+					'✅ Responsabilidad Civil UF 500 c/u',
 					'✅ Actos Maliciosos',
 					'✅ Huelga y Terrorismo',
 					'✅ Riesgos de la naturaleza, Granizo / Sismo',
 					'✅ Daños por la propia carga',
-					'✅ Daños a tercero por la propia carga UF 700',
-					'✅ Defensa Penal y Constitución de Fianza UF 150',
-					'✅ Daños a 3° por Conductores Dependientes UF 700',
+					'✅ Daños a tercero por la propia carga',
+					'✅ Defensa Penal y Constitución de Fianza UF 50',
 					'✅ Asistencia al vehículo',
-					'✅ Daños materiales por Conductores Dependientes',
 					'✅ Asiento Pasajero Plan A y Plan B'
 				];
 			}
@@ -696,8 +826,35 @@ if (isset($_SESSION['respuesta_api']) && $cotizacionServicioID !== null) {
 				$coberturas = [
 					'Full Cobertura',
 					'Daños Materiales (Valor comercial)',
+					'Responsabilidad Civil UF 500 c/u',
+					$textoTaller
+				];
+				$detalle_coberturas = [
+					'✅ Daños propios al vehículo',
+					'✅ Daños totales al vehículo',
+					'✅ Robo, Hurto, uso no Autorizado',
+					'✅ Responsabilidad Civil UF 500 c/u',
+					'✅ Actos Maliciosos',
+					'✅ Huelga y Terrorismo',
+					'✅ Riesgos de la naturaleza, Granizo / Sismo',
+					'✅ Daños por la propia carga',
+					'✅ Daños a tercero por la propia carga UF 500',
+					'✅ Robo de Accesorios',
+					'✅ Defensa Penal y Constitución de Fianza UF 50',
+					'✅ Deducible Resposable',
+					'✅ Taller de reparación ' . $textoTaller,
+					'✅ Auto de reemplazo ' . $textoAutoReemplazo,
+					'✅ Asistencia al vehículo',
+					'✅ Asiento Pasajero Plan A y Plan B'
+				];
+			}
+
+			if (str_contains($nombrePlan[$i], "FULL")) {
+				$coberturas = [
+					'Full Cobertura',
+					'Daños Materiales (Valor comercial)',
 					'Responsabilidad Civil UF 700 c/u',
-					'Taller Marca'
+					$textoTaller
 				];
 				$detalle_coberturas = [
 					'✅ Daños propios al vehículo',
@@ -710,41 +867,13 @@ if (isset($_SESSION['respuesta_api']) && $cotizacionServicioID !== null) {
 					'✅ Daños por la propia carga',
 					'✅ Daños a tercero por la propia carga UF 700',
 					'✅ Robo de Accesorios',
-					'✅ Defensa Penal y Constitución de Fianza UF 150',
-					'✅ Daños a 3° por Conductores Dependientes UF 700',
-					'✅ Taller de reparación SURA',
-					'✅ Auto de reemplazo 30 días',
+					'✅ Defensa Penal y Constitución de Fianza UF 50',
+					'✅ Deducible Resposable',
+					'✅ Taller de reparación ' . $textoTaller,
+					'✅ Auto de reemplazo ' . $textoAutoReemplazo,
 					'✅ Asistencia al vehículo',
-					'✅ Daños materiales por Conductores Dependientes',
-					'✅ Asiento Pasajero Plan A y Plan B'
-				];
-			}
-
-			if (str_contains($nombrePlan[$i], "FULL")) {
-				$coberturas = [
-					'Full Cobertura',
-					'Daños Materiales (Valor comercial)',
-					'Responsabilidad Civil UF 1.000 c/u',
-					'Taller Marca'
-				];
-				$detalle_coberturas = [
-					'✅ Daños propios al vehículo',
-					'✅ Daños totales al vehículo',
-					'✅ Robo, Hurto, uso no Autorizado',
-					'✅ Responsabilidad Civil UF 1.000 c/u',
-					'✅ Actos Maliciosos',
-					'✅ Huelga y Terrorismo',
-					'✅ Riesgos de la naturaleza, Granizo / Sismo',
-					'✅ Daños por la propia carga',
-					'✅ Daños a tercero por la propia carga UF 1.000',
-					'✅ Robo de Accesorios',
-					'✅ Defensa Penal y Constitución de Fianza UF 150',
-					'✅ Daños a 3° por Conductores Dependientes UF 1.000',
-					'✅ Taller de reparación Garantía',
-					'✅ Auto de reemplazo 45 días',
-					'✅ Asistencia al vehículo',
-					'✅ Daños materiales por Conductores Dependientes',
-					'✅ Asiento Pasajero Plan A y Plan B'
+					'✅ Asiento Pasajero Plan A y Plan B',
+					'✅ Daños propios en el extranjero'
 				];
 			}
 			        
