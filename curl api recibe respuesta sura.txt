@@ -62,3 +62,18 @@ curl -X POST https://virtualseguros.cl/api/recibe_poliza_sura.php \
     "motivo_cancelacion" : "",
     "motivo_rechazo_distinto_danio" : ""
 	}'
+	
+	
+	
+
+ 
+curl -X POST https://virtualseguros.cl/api/recibe_poliza_sura.php \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idSolicitud" : "545998",
+    "idInspeccion" : "540603",
+    "patente" : "GZRB75",
+    "aprueba_rechaza_inspeccion" : "Aprobado",
+    "motivo_cancelacion" : "",
+    "motivo_rechazo_distinto_danio" : ""
+	}'

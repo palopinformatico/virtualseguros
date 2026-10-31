@@ -93,6 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $genero = "";
         $direccion = "";
         $tipoVehSeleccionado = "";
+        $diaVencimientoGuardado = "5";
         
         $campos = explode(";", $registroMasReciente);
     
@@ -150,6 +151,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     case "NumeroCotizacion":
                         $NumeroCotizacion = htmlspecialchars(trim($valor));
                         break;
+                    case "diaVencimiento":
+                        $diaVencimientoGuardado = trim($valor);
+                        break;
                 
                     default:
                         break;
@@ -202,6 +206,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if (isset($data['paymentMethodId'])) {
                 
                 $paymentMethodId = $data['paymentMethodId'];
+                $diasPago = preg_replace('/^0+/', '', (string) $diaVencimientoGuardado);
+                $diaVencimiento = [
+                    '5' => 'Cinco',
+                    '05' => 'Cinco',
+                    '15' => 'Quince',
+                    '25' => 'VeintiCinco'
+                ][$diasPago] ?? 'Cinco';
+                wp_custom_log("El dia de pago es: " . $diasPago);
+                wp_custom_log("El día de vencimiento es: " . $diaVencimiento);
                 //echo "El paymentMethodId es: " . $paymentMethodId;
                 wp_custom_log("El paymentMethodId es: " . $paymentMethodId);
                 
@@ -317,7 +330,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                      <epv1:numeroTarjeta>$paymentMethodId</epv1:numeroTarjeta>
                                      <epv1:tarjetaID>1</epv1:tarjetaID>
                                   </epv1:PAT>
-                                  <epv1:diaVencimiento>Cinco</epv1:diaVencimiento>
+                                  <epv1:diaVencimiento>$diaVencimiento</epv1:diaVencimiento>
                                   <epv1:formaPago>Oneclick</epv1:formaPago>
                                   <epv1:numeroCuotas>12</epv1:numeroCuotas>
                                </epv1:PlanPago>

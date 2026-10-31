@@ -103,6 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['archivo'])) {
                 $comuna = htmlspecialchars($usuario['comuna']);
                 $genero = htmlspecialchars($usuario['genero']);
                 $direccion = htmlspecialchars($usuario['direccion']);
+                $diasPago = (string) ($usuario['diasPago'] ?? '5');
+                $diaVencimiento = [
+                    '5' => 'Cinco',
+                    '15' => 'Quince',
+                    '25' => 'VeintiCinco'
+                ][$diasPago] ?? 'Cinco';
                 
             } else {
                 echo "No hay datos del usuario.";
@@ -221,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['archivo'])) {
                                  <epv1:numeroTarjeta>$paymentMethodId</epv1:numeroTarjeta>
                                  <epv1:tarjetaID>1</epv1:tarjetaID>
                               </epv1:PAT>
-                              <epv1:diaVencimiento>Cinco</epv1:diaVencimiento>
+                              <epv1:diaVencimiento>$diaVencimiento</epv1:diaVencimiento>
                               <epv1:formaPago>Oneclick</epv1:formaPago>
                               <epv1:numeroCuotas>12</epv1:numeroCuotas>
                            </epv1:PlanPago>

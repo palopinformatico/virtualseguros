@@ -35,6 +35,7 @@ if (isset($_SESSION['usuario'])) {
     $nombre_comuna = $usuario['nombre_comuna'];
     $uso = $usuario['uso'];
     $codigoSOL = $usuario['codigoSOL'];
+	$diaVencimiento = htmlspecialchars($usuario['diasPago'] ?? '5');
 } else {
     echo "No hay datos de usuario en la sesión.";
 }
@@ -106,7 +107,7 @@ wp_custom_log('uuid en subir-documento por get: ' . (!empty($_GET['uuid']) ? $_G
 wp_custom_log('uuid final en subir-documento: ' . $uuid);
 
 //se guardan datos en un archivo local
-$linea = "patente: $patente; rut: $rut; fecha: $fechaHora; nombre: $nombre; apaterno: $apaterno; amaterno: $amaterno; email: $email; telefono: $telefono; fecha_nacimiento: $fecha_nacimiento; anio: $anio; codmarca: $marca; marca: $nombre_marca; codmodelo: $modelo; modelo: $nombre_modelo; codcomuna: $comuna; comuna: $nombre_comuna; genero: $genero; direccion: $direccion; esNuevo: $esNuevo; uso: $uso; uuid: $uuid; NumeroChasis: $NumeroChasis; colorVehiculo: $colorVehiculo; NumeroMotor: $NumeroMotor; cotizacionServicioID: $cotizacionServicioID; NumeroCotizacion: $NumeroCotizacion; nombrePlan: $nombrePlan; precio_clp: $precio_clp; tipoVehSeleccionado: $tipoVehSeleccionado; codigoSOL: $codigoSOL\n";
+$linea = "patente: $patente; rut: $rut; fecha: $fechaHora; nombre: $nombre; apaterno: $apaterno; amaterno: $amaterno; email: $email; telefono: $telefono; fecha_nacimiento: $fecha_nacimiento; anio: $anio; codmarca: $marca; marca: $nombre_marca; codmodelo: $modelo; modelo: $nombre_modelo; codcomuna: $comuna; comuna: $nombre_comuna; genero: $genero; direccion: $direccion; esNuevo: $esNuevo; uso: $uso; uuid: $uuid; NumeroChasis: $NumeroChasis; colorVehiculo: $colorVehiculo; NumeroMotor: $NumeroMotor; cotizacionServicioID: $cotizacionServicioID; NumeroCotizacion: $NumeroCotizacion; nombrePlan: $nombrePlan; precio_clp: $precio_clp; tipoVehSeleccionado: $tipoVehSeleccionado; codigoSOL: $codigoSOL; diaVencimiento: $diaVencimiento\n";
 file_put_contents("suscripciones.txt", $linea, FILE_APPEND | LOCK_EX);
 
 if ($esNuevo == 'Usado'){
